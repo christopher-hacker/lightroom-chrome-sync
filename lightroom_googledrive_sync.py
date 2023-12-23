@@ -122,10 +122,20 @@ def generate_download_url(gallery_url: str) -> str:
     help="Name of the folder to create in Google Drive.",
 )
 def main(gallery_url: str, folder_name: str) -> None:
-    """Main function to orchestrate the download, extraction, and uploading process."""
-    download_url = generate_download_url(gallery_url)
-    extract_to = "photos"
+    """
+    Main function to orchestrate the download, extraction, and uploading process.
+    Checks for the existence of 'token.json' and runs setup if it doesn't exist.
+    """
+    if not os.path.exists("token.json"):
+        setup_google_drive_credentials()
 
+    try:
+        download_url = generate_download_url(gallery_url)
+    except ValueError as e:
+        print(f"Error: {e}")
+        return
+
+    extract_to = "photos"
     download_and_extract_zip(download_url, extract_to)
 
     service = setup_google_drive_api()
