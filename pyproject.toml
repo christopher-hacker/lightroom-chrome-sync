@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "lightroom-googledrive-sync"
+version = "0.1.0"
+description = ""
+authors = ["Chris Hacker <49451910+christopher-hacker@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.31.0"
+google-auth = "^2.25.2"
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
+google-api-python-client = "^2.111.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.1"
+pylint = "^3.0.3"
+jupyter = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
