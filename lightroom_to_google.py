@@ -39,16 +39,28 @@ def get_google_service(service_name, service_version) -> Resource:
     ]
     creds = None
 
-    if os.path.exists("token.json"):
+    # Check for environment variables
+    token_json_str = os.getenv("TOKEN_JSON")
+    credentials_json_str = os.getenv("CREDENTIALS_JSON")
+
+    if token_json_str:
+        creds = Credentials.from_authorized_user_info(json.loads(token_json_str), scopes)
+    elif os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", scopes)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", scopes)
+            if credentials_json_str:
+                # Use credentials from environment variable
+                flow = InstalledAppFlow.from_client_config(json.loads(credentials_json_str), scopes)
+            else:
+                # Fall back to file
+                flow = InstalledAppFlow.from_client_secrets_file("credentials.json", scopes)
             creds = flow.run_local_server(port=0)
 
+    # Save or update token
     with open("token.json", "w", encoding="utf-8") as token:
         token.write(creds.to_json())
 
