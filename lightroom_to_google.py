@@ -1,6 +1,7 @@
 """Syncs photos from an Adobe Lightroom gallery to a Google Drive folder."""
 
 import io
+import json
 import os
 import tempfile
 import webbrowser
@@ -75,7 +76,10 @@ def download_and_extract_zip(url: str, extract_to: str) -> None:
 
 def setup_google_api() -> Resource:
     """Sets up the Google Drive API client."""
-    scopes = ["https://www.googleapis.com/auth/drive"]
+    scopes = [
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/photoslibrary"
+    ]
     creds = None
 
     if os.path.exists("token.json"):
@@ -105,6 +109,13 @@ def upload_files_to_drive(service: Resource, folder_id: str, directory: str) -> 
             body=file_metadata, media_body=media, fields="id"
         ).execute()
     print("Upload complete.")
+
+
+def get_google_token() -> str:
+    """Returns the token from the 'token.json' file."""
+    setup_google_api()
+    with open("token.json", "r", encoding="utf-8") as token_file:
+        return json.load(token_file)["token"]
 
 
 def generate_download_url(gallery_url: str) -> str:
