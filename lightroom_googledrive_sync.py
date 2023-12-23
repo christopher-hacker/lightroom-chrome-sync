@@ -2,6 +2,7 @@
 
 import io
 import os
+import tempfile
 import webbrowser
 import zipfile
 import click
@@ -61,7 +62,13 @@ def setup_google_drive_credentials() -> None:
 
 def download_and_extract_zip(url: str, extract_to: str) -> None:
     """Downloads and extracts a ZIP file from a URL."""
-    response = requests.get(url, timeout=10)
+    try:
+        response = requests.get(url, timeout=10)
+        assert response.status_code == 200, f"Error: {response.status_code}"
+    except requests.exceptions.RequestException as exc:
+        print(f"Error: {exc}")
+        return
+
     with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
         zip_file.extractall(extract_to)
     print("Download and extraction complete.")
@@ -87,16 +94,6 @@ def setup_google_drive_api() -> Resource:
     with open("token.json", "w", encoding="utf-8") as token:
         token.write(creds.to_json())
     return build("drive", "v3", credentials=creds)
-
-
-def create_drive_folder(service: Resource, folder_name: str) -> str:
-    """Creates a folder in Google Drive and returns its ID."""
-    folder_metadata = {
-        "name": folder_name,
-        "mimeType": "application/vnd.google-apps.folder",
-    }
-    folder = service.files().create(body=folder_metadata, fields="id").execute()
-    return folder.get("id")
 
 
 def upload_files_to_drive(service: Resource, folder_id: str, directory: str) -> None:
@@ -141,11 +138,11 @@ def generate_download_url(gallery_url: str) -> str:
     "--gallery_url", prompt="Gallery URL", help="The Adobe Lightroom gallery URL."
 )
 @click.option(
-    "--folder_name",
-    default="Photos",
-    help="Name of the folder to create in Google Drive.",
+    "--folder_id",
+    prompt="Google Drive Folder ID",
+    help="The ID of the Google Drive folder to upload to.",
 )
-def main(gallery_url: str, folder_name: str) -> None:
+def main(gallery_url: str, folder_id: str) -> None:
     """
     Main function to orchestrate the download, extraction, and uploading process.
     Checks for the existence of 'token.json' and runs setup if it doesn't exist.
@@ -159,15 +156,14 @@ def main(gallery_url: str, folder_name: str) -> None:
         print(f"Error: {e}")
         return
 
-    extract_to = "photos"
-    download_and_extract_zip(download_url, extract_to)
+    with tempfile.TemporaryDirectory() as extract_to:
+        download_and_extract_zip(download_url, extract_to)
 
-    service = setup_google_drive_api()
-    folder_id = create_drive_folder(service, folder_name)
+        service = setup_google_drive_api()
 
-    upload_files_to_drive(service, folder_id, extract_to)
+        upload_files_to_drive(service, folder_id, extract_to)
 
-    print("Upload Complete")
+        print("Upload Complete")
 
 
 if __name__ == "__main__":
