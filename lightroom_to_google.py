@@ -5,7 +5,6 @@ import json
 import os
 import tempfile
 from typing import Dict, Any
-import webbrowser
 import zipfile
 import click
 from googleapiclient.http import MediaFileUpload
@@ -16,50 +15,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 import requests
 from requests.exceptions import HTTPError
 from tqdm import tqdm
-
-
-def setup_google_drive_credentials() -> None:
-    """
-    Guides the user through the process of setting up Google Drive API credentials.
-    """
-    print(
-        "To use this script, you need to enable the Google Drive "
-        "API and download the credentials file."
-    )
-    print("Please follow these steps:\n")
-
-    print(
-        "1. Go to the Google Developers Console: https://console.developers.google.com/"
-    )
-    print("2. Create a new project or select an existing one.")
-    print(
-        "3. Navigate to 'Library' and enable the 'Google Drive API' for your project."
-    )
-    print(
-        "4. Go to 'Credentials', click on 'Create credentials', and select 'OAuth client ID'."
-    )
-    print("5. If prompted, configure the OAuth consent screen.")
-    print(
-        "6. Select 'Desktop app' as the Application type, give it a name, and click 'Create'."
-    )
-    print(
-        "7. Download the JSON file by clicking on the download "
-        "button next to the created OAuth client."
-    )
-    print(
-        "8. Rename the downloaded file to 'token.json' and place "
-        "it in the directory of this script."
-    )
-
-    input("\nPress Enter after you have completed these steps...")
-
-    # Optionally open the Google Developers Console automatically
-    open_console = input(
-        "Would you like to open the Google Developers "
-        "Console in your web browser now? (y/n): "
-    )
-    if open_console.lower() == "y":
-        webbrowser.open("https://console.developers.google.com/")
 
 
 def download_and_extract_zip(url: str, extract_to: str) -> None:
@@ -254,9 +209,6 @@ def main(
     """
     if not folder_id and not album_name:
         raise ValueError("At least one of folder_id or album_name must be specified.")
-
-    if not os.path.exists("token.json"):
-        setup_google_drive_credentials()
 
     try:
         download_url = generate_download_url(gallery_url)
