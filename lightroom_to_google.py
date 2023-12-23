@@ -74,7 +74,7 @@ def download_and_extract_zip(url: str, extract_to: str) -> None:
     print("Download and extraction complete.")
 
 
-def setup_google_api() -> Resource:
+def get_google_service(service_name) -> Resource:
     """Sets up the Google Drive API client."""
     scopes = [
         "https://www.googleapis.com/auth/drive",
@@ -94,7 +94,7 @@ def setup_google_api() -> Resource:
 
     with open("token.json", "w", encoding="utf-8") as token:
         token.write(creds.to_json())
-    return build("drive", "v3", credentials=creds)
+    return build(service_name, "v3", credentials=creds)
 
 
 def upload_files_to_drive(service: Resource, folder_id: str, directory: str) -> None:
@@ -113,7 +113,7 @@ def upload_files_to_drive(service: Resource, folder_id: str, directory: str) -> 
 
 def get_google_token() -> str:
     """Returns the token from the 'token.json' file."""
-    setup_google_api()
+    get_google_service("drive")
     with open("token.json", "r", encoding="utf-8") as token_file:
         return json.load(token_file)["token"]
 
@@ -167,9 +167,9 @@ def main(gallery_url: str, folder_id: str) -> None:
     with tempfile.TemporaryDirectory() as extract_to:
         download_and_extract_zip(download_url, extract_to)
 
-        service = setup_google_api()
+        drive_service = get_google_service("drive")
 
-        upload_files_to_drive(service, folder_id, extract_to)
+        upload_files_to_drive(drive_service, folder_id, extract_to)
 
         print("Upload Complete")
 
