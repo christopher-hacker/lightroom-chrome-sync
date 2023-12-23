@@ -5,7 +5,7 @@ description = ""
 authors = ["Chris Hacker <49451910+christopher-hacker@users.noreply.github.com>"]
 readme = "README.md"
 packages = [
-    { include = "lightroom_googledrive_sync", from = "." },
+    { include = "*", from = "." },
 ]
 
 [tool.poetry.dependencies]
