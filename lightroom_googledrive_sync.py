@@ -1,14 +1,17 @@
 """Syncs photos from an Adobe Lightroom gallery to a Google Drive folder."""
 
-import zipfile
-import os
 import io
+import os
 import webbrowser
+import zipfile
 import click
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build, Resource
 from googleapiclient.http import MediaFileUpload
+from googleapiclient.discovery import build, Resource
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
 import requests
+
 
 
 def setup_google_drive_credentials() -> None:
@@ -64,7 +67,23 @@ def download_and_extract_zip(url: str, extract_to: str) -> None:
 
 def setup_google_drive_api() -> Resource:
     """Sets up the Google Drive API client."""
-    creds = Credentials.from_authorized_user_file("token.json")
+    scopes = [
+        "https://www.googleapis.com/auth/drive"
+    ]
+    creds = None
+
+    if os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", scopes)
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", scopes)
+            creds = flow.run_local_server(port=0)
+
+    with open("token.json", "w", encoding="utf-8") as token:
+        token.write(creds.to_json())
     return build("drive", "v3", credentials=creds)
 
 
