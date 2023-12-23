@@ -15,7 +15,6 @@ import requests
 from tqdm import tqdm
 
 
-
 def setup_google_drive_credentials() -> None:
     """
     Guides the user through the process of setting up Google Drive API credentials.
@@ -74,11 +73,9 @@ def download_and_extract_zip(url: str, extract_to: str) -> None:
     print("Download and extraction complete.")
 
 
-def setup_google_drive_api() -> Resource:
+def setup_google_api() -> Resource:
     """Sets up the Google Drive API client."""
-    scopes = [
-        "https://www.googleapis.com/auth/drive"
-    ]
+    scopes = ["https://www.googleapis.com/auth/drive"]
     creds = None
 
     if os.path.exists("token.json"):
@@ -159,7 +156,7 @@ def main(gallery_url: str, folder_id: str) -> None:
     with tempfile.TemporaryDirectory() as extract_to:
         download_and_extract_zip(download_url, extract_to)
 
-        service = setup_google_drive_api()
+        service = setup_google_api()
 
         upload_files_to_drive(service, folder_id, extract_to)
 
