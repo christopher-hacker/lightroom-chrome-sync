@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "lightroom-googledrive-sync"
+name = "lightroom-google-sync"
 version = "0.1.0"
 description = ""
 authors = ["Chris Hacker <49451910+christopher-hacker@users.noreply.github.com>"]
