@@ -4,6 +4,9 @@ version = "0.1.0"
 description = ""
 authors = ["Chris Hacker <49451910+christopher-hacker@users.noreply.github.com>"]
 readme = "README.md"
+packages = [
+    { include = "lightroom_googledrive_sync", from = "." },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
