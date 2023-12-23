@@ -11,6 +11,7 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 import requests
+from tqdm import tqdm
 
 
 
@@ -63,6 +64,7 @@ def download_and_extract_zip(url: str, extract_to: str) -> None:
     response = requests.get(url, timeout=10)
     with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
         zip_file.extractall(extract_to)
+    print("Download and extraction complete.")
 
 
 def setup_google_drive_api() -> Resource:
@@ -99,13 +101,16 @@ def create_drive_folder(service: Resource, folder_name: str) -> str:
 
 def upload_files_to_drive(service: Resource, folder_id: str, directory: str) -> None:
     """Uploads files from a directory to a Google Drive folder."""
-    for filename in os.listdir(directory):
-        if filename.endswith(".jpg"):
-            file_metadata = {"name": filename, "parents": [folder_id]}
-            media = MediaFileUpload(f"{directory}/{filename}", mimetype="image/jpeg")
-            service.files().create(
-                body=file_metadata, media_body=media, fields="id"
-            ).execute()
+    files = [f for f in os.listdir(directory) if f.endswith(".jpg")]
+    print(f"Uploading {len(files)} files to Google Drive...")
+
+    for filename in tqdm(files, desc="Uploading"):
+        file_metadata = {"name": filename, "parents": [folder_id]}
+        media = MediaFileUpload(f"{directory}/{filename}", mimetype="image/jpeg")
+        service.files().create(
+            body=file_metadata, media_body=media, fields="id"
+        ).execute()
+    print("Upload complete.")
 
 
 def generate_download_url(gallery_url: str) -> str:
